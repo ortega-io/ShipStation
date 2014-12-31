@@ -129,6 +129,10 @@ class ShipStation
     public function getOrders($filters)
     {
 
+        // Enforce API requests cap //
+
+        $this->enforceApiRateLimit();
+
         // The API can't handle empty or null values on filters... (¬¬)
         // Validation of types would be useful.
 
@@ -139,11 +143,6 @@ class ShipStation
                 unset($filters[$key]);
             }
         }
-
-
-        // Enforce API requests cap //
-
-        $this->enforceApiRateLimit();
 
 
         // Build the Query String and get the orders.
@@ -180,6 +179,10 @@ class ShipStation
     public function getOrder($orderId)
     {
 
+        // Enforce API requests cap //
+
+        $this->enforceApiRateLimit();
+
         $methodPath = str_replace('{id}', $orderId, $this->methodsPaths['getOrder']);
         $response   = Unirest::get
         (
@@ -209,11 +212,13 @@ class ShipStation
 
     public function addOrder($order)
     {
-
         
+        // Enforce API requests cap //
+
+        $this->enforceApiRateLimit();
+
         // The API can't handle empty or null values on filters... (¬¬)
         // Validation of types would be useful.
-
         
         foreach($order as $property => $value)
         {
@@ -222,7 +227,6 @@ class ShipStation
                 unset($order->{"$property"});
             }
         }
-        
 
         $response = Unirest::post
         (
@@ -256,6 +260,10 @@ class ShipStation
 
     public function deleteOrder($orderId)
     {
+
+        // Enforce API requests cap //
+
+        $this->enforceApiRateLimit();
 
         $methodPath = str_replace('{id}', $orderId, $this->methodsPaths['deleteOrder']);
         $response   = Unirest::delete
@@ -296,6 +304,10 @@ class ShipStation
 
     public function getShipments($filters)
     {
+
+        // Enforce API requests cap //
+
+        $this->enforceApiRateLimit();
 
         // The API can't handle empty or null values on filters... (¬¬)
         // Validation of types would be useful.
@@ -348,6 +360,10 @@ class ShipStation
     public function getWarehouses()
     {
 
+        // Enforce API requests cap //
+
+        $this->enforceApiRateLimit();
+
 		$response = Unirest::get
 		(
 			$this->endpoint.$this->methodsPaths['getWarehouses'],
@@ -382,6 +398,10 @@ class ShipStation
 
     public function getStores()
     {
+
+        // Enforce API requests cap //
+
+        $this->enforceApiRateLimit();
 
         $response = Unirest::get
         (
