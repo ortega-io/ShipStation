@@ -37,7 +37,10 @@ http://docs.shipstation.apiary.io/
 If you happen to do that, just send me a pull request and I will be more than happy to pull, just be aware that ShipStation's documentation is... well... let's say is not very good, so be sure to test thoroughly.
 
 
-**DISCLAIMER:** "ShipStation" and "Go-Parts" are registered trademarks property of their respective owners and are used here and on the code just for reference purposes.
+**DISCLAIMERS:** 
 
+* "ShipStation" and "Go-Parts" are registered trademarks property of their respective owners and are used here and on the code just for reference purposes.
+
+* If you have troubles with the indentation, this code was edited using sublime text 3 and a tab size of 4.
 
 
