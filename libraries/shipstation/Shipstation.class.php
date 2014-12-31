@@ -1,0 +1,678 @@
+<?php
+
+/**
+ * ShipStation API Wrapper
+ *
+ * Provides an OOP interface to ShipStation API
+ *
+ * @package     Public
+ * @subpackage  ShipStation
+ * @author      Otoniel Ortega <ortega.x3@gmail.com>
+ * @copyright   2014 Otoniel Ortega (c)
+ * @version     1.0
+ * @licence     The MIT License (MIT)
+ *
+ */
+
+class ShipStation
+{
+
+	// Mashape & ShipStation credentials //
+	private $ssApiKey;
+	private $ssApiSecret;
+	private $authorization;
+	private $mashapeKey;
+    private $defaultAuthorization;
+
+
+	// Mashape endpoint & methods //
+	private $endpoint;
+	private $methodsPaths;
+
+
+    // Error Handling //
+    private $lastError;
+
+
+    // Requests cap handling //
+
+    private $remainingRequests;
+    private $resetTime;
+    private $lastRequestTime;
+
+
+
+    /**
+    * ----------------------------------------------------
+    *   _construct()
+    * ----------------------------------------------------
+    * 
+    * Instanciate ShipStation Class.
+    * 
+    * @return  Object ShipStation   
+    */
+
+    public function __construct()
+    {
+
+    	// Define Endpoint //
+    	
+    	$this->endpoint 		= 'https://shipstation.p.mashape.com/';
+
+
+    	// Define Default Credentials //
+    	// Authorization Token = The String: "{SS API Key}:{SS API Secret}" encoded with base64 //
+    	// 
+		$this->ssApiKey			= null;
+		$this->ssApiSecret		= null;
+		$this->authorization 	= 'Basic {Your Authorization Token Here}';
+		$this->mashapeKey 		= '{Your Mashape Key Here}';
+
+
+        // Requests cap handling //
+
+        $this->remainingRequests    = 40; // Current SS per-minute limit //
+        $this->resetTime            = 0;
+        $this->lastRequestTime      = null;
+
+
+		// Define Methods Paths //
+
+		$this->methodsPaths 	= array
+		(
+            
+            // Order related methods //
+
+            'getOrders'         => 'Orders',
+            'getOrder'          => 'Orders/{id}',
+            'addOrder'          => 'Orders/CreateOrder',
+            'deleteOrder'       => 'Orders/{id}',
+
+
+            // Shipment related methods //
+
+            'getShipments'      => 'Shipments/List',
+
+
+            // Warehouse related methods //
+
+			'getWarehouses' 	=> 'warehouses',
+
+
+			// Stores related methods //
+
+            'getStores'         => 'Stores',
+
+		);
+
+
+    }
+
+
+
+    // Orders Related Methods [START] ============================ //
+    // =========================================================== //
+
+
+    /**
+    * ----------------------------------------------------
+    *  getOrders($filters)
+    * ----------------------------------------------------
+    * 
+    * Get a list of all orders on ShipStation matching the filter.
+    * 
+    * @param    Array $filters
+    *
+    * @return   Array $orders
+    */
+
+    public function getOrders($filters)
+    {
+
+        // The API can't handle empty or null values on filters... (¬¬)
+        // Validation of types would be useful.
+
+        foreach($filters as $key=>$value)
+        {
+            if(empty($value))
+            {
+                unset($filters[$key]);
+            }
+        }
+
+
+        // Enforce API requests cap //
+
+        $this->enforceApiRateLimit();
+
+
+        // Build the Query String and get the orders.
+
+        $filter     = http_build_query($filters);
+        $response   = Unirest::get
+        (
+            $this->endpoint.$this->methodsPaths['getOrders'].'?'.$filter,
+            array
+            (
+                "Authorization" => $this->authorization,
+                "X-Mashape-Key" => $this->mashapeKey
+            )
+        );
+        
+        return $this->processReply($response);
+
+    }
+
+
+
+    /**
+    * ----------------------------------------------------
+    *  getOrder($orderId)
+    * ----------------------------------------------------
+    * 
+    * Get an specific order on ShipStation by its ID.
+    * 
+    * @param    int         $orderId
+    *
+    * @return   stdClass    $order
+    */
+
+    public function getOrder($orderId)
+    {
+
+        $methodPath = str_replace('{id}', $orderId, $this->methodsPaths['getOrder']);
+        $response   = Unirest::get
+        (
+            $this->endpoint.$methodPath,
+            array
+            (
+                "Authorization" => $this->authorization,
+                "X-Mashape-Key" => $this->mashapeKey
+            )
+        );
+        
+        return $this->processReply($response);
+
+    }
+
+
+
+    /**
+    * ----------------------------------------------------
+    *  addOrder($order)
+    * ----------------------------------------------------
+    * 
+    * Add a new order to ShipStation.
+    * 
+    * @return stdClass $order
+    */
+
+    public function addOrder($order)
+    {
+
+        
+        // The API can't handle empty or null values on filters... (¬¬)
+        // Validation of types would be useful.
+
+        
+        foreach($order as $property => $value)
+        {
+            if(empty($value))
+            {
+                unset($order->{"$property"});
+            }
+        }
+        
+
+        $response = Unirest::post
+        (
+            $this->endpoint.$this->methodsPaths['addOrder'],
+            array
+            (
+                "Authorization" => $this->authorization,
+                "X-Mashape-Key" => $this->mashapeKey,
+                "content-type" => "application/json"
+            ),
+            json_encode($order)
+        );
+
+        return $this->processReply($response);
+
+    }
+
+
+
+    /**
+    * ----------------------------------------------------
+    *  deleteOrder($orderId)
+    * ----------------------------------------------------
+    * 
+    * Delete an order on ShipStation by its ID.
+    * 
+    * @param    int         $orderId
+    *
+    * @return   void
+    */
+
+    public function deleteOrder($orderId)
+    {
+
+        $methodPath = str_replace('{id}', $orderId, $this->methodsPaths['deleteOrder']);
+        $response   = Unirest::delete
+        (
+            $this->endpoint.$methodPath,
+            array
+            (
+                "Authorization" => $this->authorization,
+                "X-Mashape-Key" => $this->mashapeKey
+            )
+        );
+        
+        return $this->processReply($response);
+
+    }
+
+
+    // Orders Related Methods [END] ============================== //
+    // =========================================================== //
+
+    
+
+    // Shipment Related Methods [START] ========================== //
+    // =========================================================== //
+
+
+    /**
+    * ----------------------------------------------------
+    *  getShipments($filters)
+    * ----------------------------------------------------
+    * 
+    * Get a list of all shipments on ShipStation matching the filter.
+    * 
+    * @param    Array $filters
+    *
+    * @return   Array $shipments
+    */
+
+    public function getShipments($filters)
+    {
+
+        // The API can't handle empty or null values on filters... (¬¬)
+        // Validation of types would be useful.
+
+        foreach($filters as $key=>$value)
+        {
+            if(empty($value))
+            {
+                unset($filters[$key]);
+            }
+        }
+
+
+        // Build the Query String and get the shipments.
+
+        $filter     = http_build_query($filters);
+        $response   = Unirest::get
+        (
+            $this->endpoint.$this->methodsPaths['getShipments'].'?'.$filter,
+            array
+            (
+                "Authorization" => $this->authorization,
+                "X-Mashape-Key" => $this->mashapeKey
+            )
+        );
+        
+        return $this->processReply($response);
+
+    }
+
+
+    // Shipment Related Methods [END] ============================ //
+    // =========================================================== //
+
+
+
+    // Warehouses Related Methods [START] ======================== //
+    // =========================================================== //
+
+    /**
+    * ----------------------------------------------------
+    *  getWarehouses()
+    * ----------------------------------------------------
+    * 
+    * Get list of warehouses availables.
+    * 
+    * @return Array $warehouses
+    */
+
+    public function getWarehouses()
+    {
+
+		$response = Unirest::get
+		(
+			$this->endpoint.$this->methodsPaths['getWarehouses'],
+			array
+			(
+				"Authorization" => $this->authorization,
+				"X-Mashape-Key" => $this->mashapeKey
+			)
+		);
+
+        return $this->processReply($response);
+
+    }
+
+    // Warehouses Related Methods [END] ========================== //
+    // =========================================================== //
+
+
+
+    // Stores Related Methods [START] ============================ //
+    // =========================================================== //
+
+    /**
+    * ----------------------------------------------------
+    *  getStores()
+    * ----------------------------------------------------
+    * 
+    * Get list of stores availables.
+    * 
+    * @return Array $stores
+    */
+
+    public function getStores()
+    {
+
+        $response = Unirest::get
+        (
+            $this->endpoint.$this->methodsPaths['getStores'],
+            array
+            (
+                "Authorization" => $this->authorization,
+                "X-Mashape-Key" => $this->mashapeKey
+            )
+        );
+
+        return $this->processReply($response);
+
+    }
+
+
+    // Stores Related Methods [END] ============================== //
+    // =========================================================== //
+
+
+
+    // Error Handling Methods [START] ============================ //
+    // =========================================================== //
+
+    /**
+    * ----------------------------------------------------
+    *  setLastError()
+    * ----------------------------------------------------
+    * 
+    * Sets the error object for last failed request.
+    * 
+    * @return void
+    */
+
+    public function setLastError($response)
+    {
+
+        $error    = new stdClass();
+
+        $error->code        = $response->code;
+        $error->headers     = $response->headers;
+        $error->message     = $response->raw_body;
+
+        $this->lastError    = $error;
+
+    }
+
+
+
+    /**
+    * ----------------------------------------------------
+    *  getLastError()
+    * ----------------------------------------------------
+    * 
+    * Returns the last response from server, reported as error.
+    * 
+    * @return stdClass $error
+    */
+
+    public function getLastError()
+    {
+        
+        return $this->lastError;
+
+    }
+
+
+    // Error Handling Methods [END] ============================== //
+    // =========================================================== //
+
+
+
+    // Internal Methods [START] ================================== //
+    // =========================================================== //
+
+    /**
+    * ----------------------------------------------------
+    *  processReply($reponse)
+    * ----------------------------------------------------
+    * 
+    * Process reply from server, intended to add further validation/handling.
+    * 
+    * @return stdClass $object
+    */
+
+    private function processReply($response)
+    {
+     
+
+        // API cap handling + error handling //
+
+        if(is_object($response))
+        {
+
+            $this->remainingRequests    = $response->headers['X-Rate-Limit-Remaining'];
+            $this->resetTime            = $response->headers['X-Rate-Limit-Reset'];
+            $this->lastRequestTime      = time();
+
+        }
+        else
+        {
+            // Something went really wrong...
+            return false;
+        }
+
+
+        if($response->code == 200)
+        {
+            return $response->body;
+        }
+        else
+        {
+            
+            $this->setLastError($response);
+
+            return false;
+        }
+
+    }
+
+    // Internal Methods [END] ==================================== //
+    // =========================================================== //
+
+
+
+    // Authorization and Request Cap Methods [START] ============= //
+    // =========================================================== //
+
+
+    /**
+    * ----------------------------------------------------
+    *  setMashapeKey($mashapeKey)
+    * ----------------------------------------------------
+    * 
+    * Sets Mashape Key.
+    * 
+    * @return void
+    */
+
+    public function setMashapeKey($mashapeKey)
+    {
+        
+        $this->mashapeKey = $mashapeKey;
+
+    }
+
+
+
+    /**
+    * ----------------------------------------------------
+    *  setSsApiKey($ssApiKey)
+    * ----------------------------------------------------
+    * 
+    * Sets ShipStation Api Key.
+    * 
+    * @return void
+    */
+
+    public function setSsApiKey($ssApiKey)
+    {
+        
+        $this->ssApiKey = $ssApiKey;
+
+        if(!empty($this->ssApiSecret))
+        {
+        	$this->authorization = 'Basic '.base64_encode($this->ssApiKey.':'.$this->ssApiSecret);
+        }
+
+    }
+
+
+
+    /**
+    * ----------------------------------------------------
+    *  setSsApiSecret($ssApiSecret)
+    * ----------------------------------------------------
+    * 
+    * Sets ShipStation Api Secret.
+    * 
+    * @return void
+    */
+
+    public function setSsApiSecret($ssApiSecret)
+    {
+        
+        $this->ssApiSecret = $ssApiSecret;
+
+        if(!empty($this->ssApiKey))
+        {
+        	$this->authorization = 'Basic '.base64_encode($this->ssApiKey.':'.$this->ssApiSecret);
+        }
+
+    }
+
+
+
+    /**
+    * ----------------------------------------------------
+    *  setAuthorization($authorization)
+    * ----------------------------------------------------
+    * 
+    * Sets the authorization token to use directly
+    * allowing to switch between multiple ShipStation Accounts faster.
+    * 
+    * @return void
+    */
+
+    public function setAuthorization($authorization)
+    {
+        
+        $this->authorization    = $authorization;
+
+    }
+
+
+    /**
+    * ----------------------------------------------------
+    *  resetAuthorization()
+    * ----------------------------------------------------
+    * 
+    * Resets the authorization token to default.
+    * 
+    * @return void
+    */
+
+    public function resetAuthorization()
+    {
+        
+        $this->authorization    =  $this->defaultAuthorization;
+
+    }
+
+
+
+    /**
+    * ----------------------------------------------------
+    *  enforceApiRateLimit()
+    * ----------------------------------------------------
+    * 
+    * Enforces ShipStation API
+    * 
+    * @return stdClass $object
+    */
+
+    /* WARNING:
+    /* Currently the request cap as defined by ShipStation is not being honored
+    /* so the request throughput never reaches 40 requests per minute
+    /* but this code should handle it if the cap is ever to be honored...
+	*/
+
+    private function enforceApiRateLimit()
+    {
+        
+        if($this->remainingRequests>0)
+        {
+            return;
+        }
+        else
+        {
+            
+            if( !empty($this->lastRequestTime) )
+            {
+                
+                $elapsedTime        = ( time() - $this->lastRequestTime );
+
+                if( $elapsedTime > $this->resetTime )
+                {
+                    return;
+                }
+                else
+                {
+                    $waitingTime    = ( $this->resetTime - $elapsedTime );
+                    
+                    sleep($waitingTime);
+                }
+
+            }
+            else
+            {
+                return; // We never should get here...
+            }
+
+            
+        }
+
+    }
+
+    // Authorization and Request Cap Methods [END] =============== //
+    // =========================================================== //
+
+}
+
+
+?>
