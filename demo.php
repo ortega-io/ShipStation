@@ -30,7 +30,6 @@ $shipStation 	= new Shipstation();
 
 $shipStation->setSsApiKey('{Your ShipStation API Key Here}');
 $shipStation->setSsApiSecret('{Your ShipStation API Secret Here}');
-$shipStation->setMashapeKey('{Your Mashape Key Here}');
 
 
 
