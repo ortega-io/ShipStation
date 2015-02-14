@@ -17,15 +17,14 @@
 class ShipStation
 {
 
-	// Mashape & ShipStation credentials //
+	// ShipStation credentials //
 	private $ssApiKey;
 	private $ssApiSecret;
 	private $authorization;
-	private $mashapeKey;
     private $defaultAuthorization;
 
 
-	// Mashape endpoint & methods //
+	// Shipstation endpoint & methods //
 	private $endpoint;
 	private $methodsPaths;
 
@@ -47,7 +46,7 @@ class ShipStation
     *   _construct()
     * ----------------------------------------------------
     * 
-    * Instanciate ShipStation Class.
+    * Instantiate ShipStation Class.
     * 
     * @return  Object ShipStation   
     */
@@ -57,7 +56,7 @@ class ShipStation
 
     	// Define Endpoint //
     	
-    	$this->endpoint 		= 'https://shipstation.p.mashape.com/';
+    	$this->endpoint 		= 'https://ssapi.shipstation.com/';
 
 
     	// Define Default Credentials //
@@ -66,7 +65,6 @@ class ShipStation
 		$this->ssApiKey			= null;
 		$this->ssApiSecret		= null;
 		$this->authorization 	= 'Basic {Your Authorization Token Here}';
-		$this->mashapeKey 		= '{Your Mashape Key Here}';
 
 
         // Requests cap handling //
@@ -153,8 +151,7 @@ class ShipStation
             $this->endpoint.$this->methodsPaths['getOrders'].'?'.$filter,
             array
             (
-                "Authorization" => $this->authorization,
-                "X-Mashape-Key" => $this->mashapeKey
+                "Authorization" => $this->authorization
             )
         );
         
@@ -189,8 +186,7 @@ class ShipStation
             $this->endpoint.$methodPath,
             array
             (
-                "Authorization" => $this->authorization,
-                "X-Mashape-Key" => $this->mashapeKey
+                "Authorization" => $this->authorization
             )
         );
         
@@ -234,7 +230,6 @@ class ShipStation
             array
             (
                 "Authorization" => $this->authorization,
-                "X-Mashape-Key" => $this->mashapeKey,
                 "content-type" => "application/json"
             ),
             json_encode($order)
@@ -271,8 +266,7 @@ class ShipStation
             $this->endpoint.$methodPath,
             array
             (
-                "Authorization" => $this->authorization,
-                "X-Mashape-Key" => $this->mashapeKey
+                "Authorization" => $this->authorization
             )
         );
         
@@ -329,8 +323,7 @@ class ShipStation
             $this->endpoint.$this->methodsPaths['getShipments'].'?'.$filter,
             array
             (
-                "Authorization" => $this->authorization,
-                "X-Mashape-Key" => $this->mashapeKey
+                "Authorization" => $this->authorization
             )
         );
         
@@ -369,8 +362,7 @@ class ShipStation
 			$this->endpoint.$this->methodsPaths['getWarehouses'],
 			array
 			(
-				"Authorization" => $this->authorization,
-				"X-Mashape-Key" => $this->mashapeKey
+				"Authorization" => $this->authorization
 			)
 		);
 
@@ -408,8 +400,7 @@ class ShipStation
             $this->endpoint.$this->methodsPaths['getStores'],
             array
             (
-                "Authorization" => $this->authorization,
-                "X-Mashape-Key" => $this->mashapeKey
+                "Authorization" => $this->authorization
             )
         );
 
@@ -492,7 +483,6 @@ class ShipStation
      
 
         // API cap handling + error handling //
-
         if(is_object($response))
         {
 
@@ -529,24 +519,6 @@ class ShipStation
 
     // Authorization and Request Cap Methods [START] ============= //
     // =========================================================== //
-
-
-    /**
-    * ----------------------------------------------------
-    *  setMashapeKey($mashapeKey)
-    * ----------------------------------------------------
-    * 
-    * Sets Mashape Key.
-    * 
-    * @return void
-    */
-
-    public function setMashapeKey($mashapeKey)
-    {
-        
-        $this->mashapeKey = $mashapeKey;
-
-    }
 
 
 
