@@ -30,7 +30,7 @@ The Wrapper class is designed to support the API Request Cap as defined by ShipS
 You are more than welcome to add the missing methods on the Wrapper Class, just follow the coding style and the naming conventions, you can find more information about the API at:
 
 ```
-https://www.mashape.com/shipstation/shipstation
+http://www.shipstation.com/developer-api/
 http://docs.shipstation.apiary.io/
 ```
 
