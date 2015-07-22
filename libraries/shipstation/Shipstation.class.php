@@ -83,6 +83,7 @@ class ShipStation
 
             'getOrders'         => 'Orders',
             'getOrder'          => 'Orders/{id}',
+	    'addTagToOrder'	=> 'Orders/addtag',
             'addOrder'          => 'Orders/CreateOrder',
             'deleteOrder'       => 'Orders/{id}',
 
@@ -194,7 +195,44 @@ class ShipStation
 
     }
 
+    /**
+     * --------------------------------------------------
+     * addTagToOrder($orderId, $tagId)
+     * --------------------------------------------------
+     * 
+     * Add a Tag to a Shipstation Order.
+     * 
+     * @param    int         $orderId
+     * @param    int         $tagId
+     * 
+     * @return   stdClass    $order
+     */
+     
+     public function addTagToOrder($orderId, $tagId)
+     {
+     	
+     	// Enforce API requests cap //
 
+        $this->enforceApiRateLimit();
+        
+        $response = Unirest::post
+        (
+            $this->endpoint.$this->methodsPaths['addTagToOrder'],
+            array
+            (
+                "Authorization" => $this->authorization,
+                "Content-type" => "application/json"
+            ),
+            json_encode(array
+            (
+            	"orderId" => $orderId,
+            	"tagId" => $tagId
+            ) )
+        );
+
+        return $this->processReply($response);
+     	
+     }
 
     /**
     * ----------------------------------------------------
