@@ -160,6 +160,45 @@ class ShipStation
 
     }
 
+    /**
+     * ----------------------------------------------------
+     *  getAllOrders($filters)
+     * ----------------------------------------------------
+     *
+     * Get a list of all orders on ShipStation matching the filter of all the pages.
+     *
+     * @param    Array $filters
+     *
+     * @return   Array $allOrders
+     */
+    public function getAllOrders($filters){
+
+        $allOrders = array();
+        $searchResult 	= $this->getOrders($filters);
+        if(!empty($searchResult)){
+            $orders = $searchResult->orders;
+            foreach ($orders as $or) {
+                array_push($allOrders,$or);
+            }
+
+            $currentPage = $searchResult->page;
+            $totalPages = $searchResult->pages;
+
+            if($currentPage < $totalPages){
+                for($i=2;$i<=$totalPages;$i++){
+                    $filters['page'] = $i;
+                    $searchResult 	= $this->getOrders($filters);
+                    $orders = $searchResult->orders;
+                    foreach ($orders as $or) {
+                        array_push($allOrders,$or);
+                    }
+                }
+
+
+            }
+        }
+        return $allOrders;
+    }
 
 
     /**
@@ -366,6 +405,53 @@ class ShipStation
         );
         
         return $this->processReply($response);
+
+    }
+
+
+    /**
+     * ----------------------------------------------------
+     *  getAllShipments($filters)
+     * ----------------------------------------------------
+     *
+     * Get a list of all shipments on ShipStation matching the filter on all pages.
+     *
+     * @param    Array $filters
+     *
+     * @return   Array $allShipments
+     */
+
+    public function getAllShipments($filters)
+    {
+        $allShipments = array();
+
+        $searchResult 	= $this->getShipments($filters);
+
+        $shipments 		= $searchResult->shipments;
+        if(!empty($shipments)){
+            foreach($shipments as $sh){
+                array_push($allShipments,$sh);
+            }
+
+            $currentPage 	= $searchResult->page;
+            $totalPages 	= $searchResult->pages;
+
+            if($currentPage < $totalPages){
+                for($i=2;$i<=$totalPages;$i++){
+                    $filters['page'] = $i;
+                    $searchResult 	= $this->getShipments($filters);
+                    $shipments 		= $searchResult->shipments;
+
+                    foreach($shipments as $sh){
+                        array_push($allShipments,$sh);
+                    }
+                }
+            }
+
+        }
+
+        return $allShipments;
+
 
     }
 
