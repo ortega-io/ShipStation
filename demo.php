@@ -56,6 +56,11 @@ $testDeleteOrder 	= false;
 
 $testGetShipments 	= false;
 
+// Webhook related methods //
+
+$testWebhookSubscribe 	= false;
+$testWebhookUnsubscribe 	= false;
+
 
 
 // Store Related Methods [START] ============================= //
@@ -461,6 +466,69 @@ if($testGetShipments)
 
 
 // Shipment Related Methods [END] ============================ //
+// =========================================================== //
+// =========================================================== //
+
+// Webhook Related Methods [START] ========================== //
+// =========================================================== //
+// =========================================================== //
+
+
+// Webhook Subscribe [START] ================================= //
+// =========================================================== //
+
+if($testWebhookSubscribe)
+{
+
+	echo ">> [Webhook Subscribe] ================================= \n\n";
+
+	// Defining Webhook Subscribe [START] ========================= //
+	// ============================================================ //
+
+	// Define base hook elements //
+
+	$hook = new stdClass();
+
+    $hook->target_url = "http://someexamplewebhookurl.com/neworder";
+    $hook->event = "ORDER_NOTIFY"; // {ORDER_NOTIFY, ITEM_ORDER_NOTIFY, SHIP_NOTIFY, ITEM_SHIP_NOTIFY}
+    $hook->store_id = null;
+    $hook->friendly_name = "My Webhook";
+
+	// Defining Webhook Subscribe [END] =========================== //
+	// ============================================================ //
+
+    $result = $shipStation->addWebhook($hook);
+
+	echo "> Webhook ID: ".$result->id."\n";
+
+}
+
+
+// =========================================================== //
+// Webhook Subscribe [END] =================================== //
+
+// Webhook Unsubscribe [START] ================================= //
+// =========================================================== //
+
+if($testWebhookUnsubscribe)
+{
+
+	echo ">> [Webhook Unsubscribe] ================================= \n\n";
+
+	$webhookId 	= "{Your Webhook ID Here}";
+
+	$result 	= $shipStation->deleteWebhook($webhookId);
+
+	print_r($result);
+
+}
+
+
+// =========================================================== //
+// Webhook Unsubscribe [END] =================================== //
+
+
+// Webhook Related Methods [END] ============================ //
 // =========================================================== //
 // =========================================================== //
 

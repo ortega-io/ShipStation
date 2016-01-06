@@ -83,7 +83,7 @@ class ShipStation
 
             'getOrders'         => 'Orders',
             'getOrder'          => 'Orders/{id}',
-	    'addTagToOrder'	=> 'Orders/addtag',
+            'addTagToOrder'	    => 'Orders/addtag',
             'addOrder'          => 'Orders/CreateOrder',
             'deleteOrder'       => 'Orders/{id}',
 
@@ -101,6 +101,12 @@ class ShipStation
 			// Stores related methods //
 
             'getStores'         => 'Stores',
+
+            // Webhook related methods //
+
+            'addWebhook'        => 'webhooks/subscribe',
+
+            'deleteWebhook'     => 'webhooks/{id}',
 
 		);
 
@@ -536,7 +542,82 @@ class ShipStation
     // Stores Related Methods [END] ============================== //
     // =========================================================== //
 
+    // Webhook Related Methods [START] ============================ //
+    // =========================================================== //
 
+    /**
+    * ----------------------------------------------------
+    *  addWebhook($hook)
+    * ----------------------------------------------------
+    * 
+    * Webhook Subscribe.
+    * 
+    * @return Array $webhookId
+    */
+
+    public function addWebhook($hook)
+    {
+
+        // Enforce API requests cap //
+
+        $this->enforceApiRateLimit();
+
+        foreach($hook as $property => $value)
+        {
+            if(empty($value))
+            {
+                unset($hook->{"$property"});
+            }
+        }
+
+        $response = Unirest::post
+        (
+            $this->endpoint.$this->methodsPaths['addWebhook'],
+            array
+            (
+                "Authorization" => $this->authorization,
+                "content-type" => "application/json"
+            ),
+            json_encode($hook)
+        );
+
+        return $this->processReply($response);
+
+    }
+
+    /**
+    * ----------------------------------------------------
+    *  deleteWebhook($webhookId)
+    * ----------------------------------------------------
+    * 
+    * Webhook Unsubscribe.
+    * 
+    * @return Status code 200
+    */
+
+    public function deleteWebhook($webhookId)
+    {
+
+        // Enforce API requests cap //
+
+        $this->enforceApiRateLimit();
+
+        $methodPath = str_replace('{id}', $webhookId, $this->methodsPaths['deleteWebhook']);
+        $response   = Unirest::delete
+        (
+            $this->endpoint.$methodPath,
+            array
+            (
+                "Authorization" => $this->authorization
+            )
+        );
+
+        return $this->processReply($response);
+
+    }
+
+    // Webhook Related Methods [END] ============================== //
+    // =========================================================== //
 
     // Error Handling Methods [START] ============================ //
     // =========================================================== //
