@@ -97,11 +97,18 @@ class ShipStation
 
 			'getWarehouses' 	=> 'warehouses',
 
-
+            
 			// Stores related methods //
 
             'getStores'         => 'Stores',
+            
+            
+            // Carriers related methods //
 
+            'getCarriers'         => 'carriers',
+            'getCarrier'          => 'carriers/getcarrier',
+            'getPackages'         => 'carriers/listpackages',
+            'getServices'         => 'carriers/listservices'
 		);
 
 
@@ -507,7 +514,7 @@ class ShipStation
     *  getStores()
     * ----------------------------------------------------
     * 
-    * Get list of stores availables.
+    * Get list of stores available.
     * 
     * @return Array $stores
     */
@@ -534,6 +541,142 @@ class ShipStation
 
 
     // Stores Related Methods [END] ============================== //
+    // =========================================================== //
+
+    
+    // Carriers Related Methods [START] ============================ //
+    // =========================================================== //
+
+    /**
+    * ----------------------------------------------------
+    *  getCarriers()
+    * ----------------------------------------------------
+    * 
+    * Get list of carriers available.
+    * 
+    * @return Array $carriers
+    */
+
+    public function getCarriers()
+    {
+
+        // Enforce API requests cap //
+
+        $this->enforceApiRateLimit();
+
+        $response = Unirest::get
+        (
+            $this->endpoint.$this->methodsPaths['getCarriers'],
+            array
+            (
+                "Authorization" => $this->authorization
+            )
+        );
+
+        return $this->processReply($response);
+
+    }
+    
+     /**
+    * ----------------------------------------------------
+    *  getCarrier($carrierCode)
+    * ----------------------------------------------------
+    * 
+    * Get attributes of Carrier matching provided carrierCode
+    * 
+    * @param    String $carrierCode
+    *
+    * @return   Object $carrier
+    */
+
+    public function getCarrier($carrierCode)
+    {
+        // Enforce API requests cap //
+
+        $this->enforceApiRateLimit();
+
+        // Build the Query String and get the orders.
+
+        $response   = Unirest::get
+        (
+            $this->endpoint.$this->methodsPaths['getCarrier'].'?carrierCode='.$carrierCode,
+            array
+            (
+                "Authorization" => $this->authorization
+            )
+        );
+        
+        return $this->processReply($response);
+
+    }
+    
+    /**
+    * ----------------------------------------------------
+    *  getPackages($carrierCode)
+    * ----------------------------------------------------
+    * 
+    * Get a list of all Packages offered by the supplied carrierCode
+    * 
+    * @param    String $carrierCode
+    *
+    * @return   Array $packages
+    */
+
+    public function getPackages($carrierCode)
+    {
+        // Enforce API requests cap //
+
+        $this->enforceApiRateLimit();
+
+        // Build the Query String and get the orders.
+
+        $response   = Unirest::get
+        (
+            $this->endpoint.$this->methodsPaths['getPackages'].'?carrierCode='.$carrierCode,
+            array
+            (
+                "Authorization" => $this->authorization
+            )
+        );
+        
+        return $this->processReply($response);
+
+    }
+    
+    /**
+    * ----------------------------------------------------
+    *  getServices($carrierCode)
+    * ----------------------------------------------------
+    * 
+    * Get a list of all Services offered by the supplied carrierCode
+    * 
+    * @param    String $carrierCode
+    *
+    * @return   Array $services
+    */
+
+    public function getServices($carrierCode)
+    {
+
+        // Enforce API requests cap //
+
+        $this->enforceApiRateLimit();
+
+        // Build the Query String and get the orders.
+
+        $response   = Unirest::get
+        (
+            $this->endpoint.$this->methodsPaths['getServices'].'?carrierCode='.$carrierCode,
+            array
+            (
+                "Authorization" => $this->authorization
+            )
+        );
+        
+        return $this->processReply($response);
+
+    }
+    // Carriers Related Methods [END] ============================== //
     // =========================================================== //
 
 
