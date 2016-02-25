@@ -91,6 +91,7 @@ class ShipStation
             // Shipment related methods //
 
             'getShipments'      => 'Shipments/List',
+            'getRates'      	=> 'shipments/getrates',
 
 
             // Warehouse related methods //
@@ -462,7 +463,54 @@ class ShipStation
 
     }
 
+	/**
+    * ----------------------------------------------------
+    *  getRates($filters)
+    * ----------------------------------------------------
+    * 
+    * Retrieves shipping rates for the specified shipping details. 
+    * 
+    * @param    Array $filters
+    *
+    * @return   Array $rates
+    */
 
+    public function getRates($filters)
+    {
+
+        // Enforce API requests cap //
+
+        $this->enforceApiRateLimit();
+
+        // The API can't handle empty or null values on filters... (¬¬)
+        // Validation of types would be useful.
+
+        foreach($filters as $key=>$value)
+        {
+            if(empty($value))
+            {
+                unset($filters[$key]);
+            }
+        }
+
+        // Build the Query String and get the shipments.
+
+        $filter     = http_build_query($filters);
+        $response   = Unirest::post
+        (
+        	$this->endpoint.$this->methodsPaths['getRates'],
+            array
+            (
+                "Authorization" => $this->authorization,
+                "Content-type" => "application/json"
+            ),
+            json_encode( $filters )      
+        );
+        
+        return $this->processReply($response);
+
+    }
+    
     // Shipment Related Methods [END] ============================ //
     // =========================================================== //
 
@@ -771,7 +819,6 @@ class ShipStation
         }
         else
         {
-            
             $this->setLastError($response);
 
             return false;
