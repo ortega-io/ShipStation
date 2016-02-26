@@ -55,7 +55,7 @@ $testDeleteOrder 	= false;
 // Shipment related methods //
 
 $testGetShipments 	= false;
-
+$testCreateLabel 	= false;  // This test streams a PDF to the browser as a file download. Test separately.
 
 
 // Store Related Methods [START] ============================= //
@@ -454,6 +454,67 @@ if($testGetShipments)
 	print_r($shipments);
 
 }
+
+// Create a Label [START] ====================================== //
+// =========================================================== //
+
+if($testCreateLabel)
+{
+
+	$filters = array(
+            "carrierCode"=> "ups",
+            "serviceCode"=>"ups_ground",
+            "packageCode"=>"package",
+            "weight"=>array(
+                "value"=>2,
+                "units"=>"ounces"
+            ),
+            "shipFrom"=> array(
+				"name"=>"Jonathan Moyes",							  
+				"company"=>"",
+				"phone"=>"303-555-1212",
+				"Email"=>"example@test.com", 
+				"street1"=>"123 Main Street",
+				"street2"=>"",
+				"city"=>"Boulder",
+				"state"=>"CO",
+				"postalCode"=>"80301",
+				"country"=>"US"	
+			),
+            "shipTo"=> array(
+				"name"=>"RMA Processing",							  
+				"company"=>"Modular Robotics",
+				"phone"=>"303-656-9407",
+				"email"=>"support@modrobotics.com", 
+				"street1"=>"1860 38th Street",
+				"street2"=>"",
+				"city"=>"Boulder",
+				"state"=>"CO",
+				"postalCode"=>"80301",
+				"country"=>"US"	
+			),
+            "testLabel"=>false
+	);
+	
+	$label = $shipStation->createLabel($filters);
+	
+	$filename = "label-" . $label->carrierCode . "-" . $label->trackingNumber . ".pdf";
+	
+	header("Pragma: public");
+	header("Expires: 0");
+	header("Cache-Control: must-revalidate, post-check=0, pre-check=0");
+	header("Cache-Control: public"); 
+	header("Content-Description: File Transfer"); 
+	header("Content-Type: application/pdf"); 
+	header("Content-Disposition: attachment; filename=" . $filename);
+	header("Content-Transfer-Encoding: binary");
+	
+	echo base64_decode($label->labelData);
+	die();
+}
+
+// =========================================================== //
+// Create a Label [END] ======================================== //
 
 
 // =========================================================== //

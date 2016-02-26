@@ -92,6 +92,7 @@ class ShipStation
 
             'getShipments'      => 'Shipments/List',
             'getRates'      	=> 'shipments/getrates',
+            'createLabel'      	=> 'shipments/createLabel',
 
 
             // Warehouse related methods //
@@ -511,6 +512,54 @@ class ShipStation
 
     }
     
+    /**
+    * ----------------------------------------------------
+    *  createLabel($filters)
+    * ----------------------------------------------------
+    * 
+    * Creates a shipping label. The labelData field returned in the response is a base64 encoded PDF value.
+    * Simply decode and save the output as a PDF file to retrieve a printable label.
+    * 
+    * @param    Array $filters
+    *
+    * @return   Array $label
+    */
+
+    public function createLabel($filters)
+    {
+
+        // Enforce API requests cap //
+
+        $this->enforceApiRateLimit();
+
+        // The API can't handle empty or null values on filters... (¬¬)
+        // Validation of types would be useful.
+
+        foreach($filters as $key=>$value)
+        {
+            if(empty($value))
+            {
+                unset($filters[$key]);
+            }
+        }
+
+        // Build the Query String and get the shipments.
+
+        $filter     = http_build_query($filters);
+        $response   = Unirest::post
+        (
+        	$this->endpoint.$this->methodsPaths['createLabel'],
+            array
+            (
+                "Authorization" => $this->authorization,
+                "Content-type" => "application/json"
+            ),
+            json_encode( $filters )      
+        );
+        return $this->processReply($response);
+
+    }
+    
     // Shipment Related Methods [END] ============================ //
     // =========================================================== //
 
@@ -785,7 +834,7 @@ class ShipStation
 
     /**
     * ----------------------------------------------------
-    *  processReply($reponse)
+    *  processReply($response)
     * ----------------------------------------------------
     * 
     * Process reply from server, intended to add further validation/handling.

@@ -16,6 +16,7 @@ The Wrapper currently supports the following operations:
 * Get the list of Services available from a Carrier
 * Get the list of Packages available from a Carrier
 * Get shipment rates
+* Create shipping labels
 
 ## Using the demo file
 
