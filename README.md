@@ -11,7 +11,12 @@ The Wrapper currently supports the following operations:
 * Send a new order to ShipStation
 * Delete an order on ShipStation
 * Get the list of shipments on the system (filtered or unfiltered)
-
+* Get the list of Carriers available
+* Get the details of a specific Carrier
+* Get the list of Services available from a Carrier
+* Get the list of Packages available from a Carrier
+* Get shipment rates
+* Create shipping labels
 
 ## Using the demo file
 

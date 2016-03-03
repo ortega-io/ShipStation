@@ -91,17 +91,26 @@ class ShipStation
             // Shipment related methods //
 
             'getShipments'      => 'Shipments/List',
+            'getRates'      	=> 'shipments/getrates',
+            'createLabel'      	=> 'shipments/createLabel',
 
 
             // Warehouse related methods //
 
 			'getWarehouses' 	=> 'warehouses',
 
-
+            
 			// Stores related methods //
 
             'getStores'         => 'Stores',
+            
+            
+            // Carriers related methods //
 
+            'getCarriers'         => 'carriers',
+            'getCarrier'          => 'carriers/getcarrier',
+            'getPackages'         => 'carriers/listpackages',
+            'getServices'         => 'carriers/listservices'
 		);
 
 
@@ -455,7 +464,102 @@ class ShipStation
 
     }
 
+	/**
+    * ----------------------------------------------------
+    *  getRates($filters)
+    * ----------------------------------------------------
+    * 
+    * Retrieves shipping rates for the specified shipping details. 
+    * 
+    * @param    Array $filters
+    *
+    * @return   Array $rates
+    */
 
+    public function getRates($filters)
+    {
+
+        // Enforce API requests cap //
+
+        $this->enforceApiRateLimit();
+
+        // The API can't handle empty or null values on filters... (¬¬)
+        // Validation of types would be useful.
+
+        foreach($filters as $key=>$value)
+        {
+            if(empty($value))
+            {
+                unset($filters[$key]);
+            }
+        }
+
+        // Build the Query String and get the shipments.
+
+        $filter     = http_build_query($filters);
+        $response   = Unirest::post
+        (
+        	$this->endpoint.$this->methodsPaths['getRates'],
+            array
+            (
+                "Authorization" => $this->authorization,
+                "Content-type" => "application/json"
+            ),
+            json_encode( $filters )      
+        );
+        
+        return $this->processReply($response);
+
+    }
+    
+    /**
+    * ----------------------------------------------------
+    *  createLabel($filters)
+    * ----------------------------------------------------
+    * 
+    * Creates a shipping label. The labelData field returned in the response is a base64 encoded PDF value.
+    * Simply decode and save the output as a PDF file to retrieve a printable label.
+    * 
+    * @param    Array $filters
+    *
+    * @return   Array $label
+    */
+
+    public function createLabel($filters)
+    {
+
+        // Enforce API requests cap //
+
+        $this->enforceApiRateLimit();
+
+        // The API can't handle empty or null values on filters... (¬¬)
+        // Validation of types would be useful.
+
+        foreach($filters as $key=>$value)
+        {
+            if(empty($value))
+            {
+                unset($filters[$key]);
+            }
+        }
+
+        // Build the Query String and get the shipments.
+
+        $filter     = http_build_query($filters);
+        $response   = Unirest::post
+        (
+        	$this->endpoint.$this->methodsPaths['createLabel'],
+            array
+            (
+                "Authorization" => $this->authorization,
+                "Content-type" => "application/json"
+            ),
+            json_encode( $filters )      
+        );
+        return $this->processReply($response);
+
+    }
+    
     // Shipment Related Methods [END] ============================ //
     // =========================================================== //
 
@@ -507,7 +611,7 @@ class ShipStation
     *  getStores()
     * ----------------------------------------------------
     * 
-    * Get list of stores availables.
+    * Get list of stores available.
     * 
     * @return Array $stores
     */
@@ -534,6 +638,142 @@ class ShipStation
 
 
     // Stores Related Methods [END] ============================== //
+    // =========================================================== //
+
+    
+    // Carriers Related Methods [START] ============================ //
+    // =========================================================== //
+
+    /**
+    * ----------------------------------------------------
+    *  getCarriers()
+    * ----------------------------------------------------
+    * 
+    * Get list of carriers available.
+    * 
+    * @return Array $carriers
+    */
+
+    public function getCarriers()
+    {
+
+        // Enforce API requests cap //
+
+        $this->enforceApiRateLimit();
+
+        $response = Unirest::get
+        (
+            $this->endpoint.$this->methodsPaths['getCarriers'],
+            array
+            (
+                "Authorization" => $this->authorization
+            )
+        );
+
+        return $this->processReply($response);
+
+    }
+    
+     /**
+    * ----------------------------------------------------
+    *  getCarrier($carrierCode)
+    * ----------------------------------------------------
+    * 
+    * Get attributes of Carrier matching provided carrierCode
+    * 
+    * @param    String $carrierCode
+    *
+    * @return   Object $carrier
+    */
+
+    public function getCarrier($carrierCode)
+    {
+        // Enforce API requests cap //
+
+        $this->enforceApiRateLimit();
+
+        // Build the Query String and get the orders.
+
+        $response   = Unirest::get
+        (
+            $this->endpoint.$this->methodsPaths['getCarrier'].'?carrierCode='.$carrierCode,
+            array
+            (
+                "Authorization" => $this->authorization
+            )
+        );
+        
+        return $this->processReply($response);
+
+    }
+    
+    /**
+    * ----------------------------------------------------
+    *  getPackages($carrierCode)
+    * ----------------------------------------------------
+    * 
+    * Get a list of all Packages offered by the supplied carrierCode
+    * 
+    * @param    String $carrierCode
+    *
+    * @return   Array $packages
+    */
+
+    public function getPackages($carrierCode)
+    {
+        // Enforce API requests cap //
+
+        $this->enforceApiRateLimit();
+
+        // Build the Query String and get the orders.
+
+        $response   = Unirest::get
+        (
+            $this->endpoint.$this->methodsPaths['getPackages'].'?carrierCode='.$carrierCode,
+            array
+            (
+                "Authorization" => $this->authorization
+            )
+        );
+        
+        return $this->processReply($response);
+
+    }
+    
+    /**
+    * ----------------------------------------------------
+    *  getServices($carrierCode)
+    * ----------------------------------------------------
+    * 
+    * Get a list of all Services offered by the supplied carrierCode
+    * 
+    * @param    String $carrierCode
+    *
+    * @return   Array $services
+    */
+
+    public function getServices($carrierCode)
+    {
+
+        // Enforce API requests cap //
+
+        $this->enforceApiRateLimit();
+
+        // Build the Query String and get the orders.
+
+        $response   = Unirest::get
+        (
+            $this->endpoint.$this->methodsPaths['getServices'].'?carrierCode='.$carrierCode,
+            array
+            (
+                "Authorization" => $this->authorization
+            )
+        );
+        
+        return $this->processReply($response);
+
+    }
+    // Carriers Related Methods [END] ============================== //
     // =========================================================== //
 
 
@@ -594,7 +834,7 @@ class ShipStation
 
     /**
     * ----------------------------------------------------
-    *  processReply($reponse)
+    *  processReply($response)
     * ----------------------------------------------------
     * 
     * Process reply from server, intended to add further validation/handling.
@@ -628,7 +868,6 @@ class ShipStation
         }
         else
         {
-            
             $this->setLastError($response);
 
             return false;
