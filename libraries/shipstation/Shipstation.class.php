@@ -98,6 +98,7 @@ class ShipStation
             // Warehouse related methods //
 
 			'getWarehouses' 	=> 'warehouses',
+            'deleteWarehouse' 	=> 'warehouses/{id}',
 
             
 			// Stores related methods //
@@ -593,6 +594,39 @@ class ShipStation
 				"Authorization" => $this->authorization
 			)
 		);
+
+        return $this->processReply($response);
+
+    }
+
+    /**
+    * ----------------------------------------------------
+    *  deleteWarehouse()
+    * ----------------------------------------------------
+    * 
+    * Delete a warehouses on ShipStation by its ID.
+    * 
+    * @param  int $warehouseId
+    * @return void
+    */
+
+    public function deleteWarehouse($warehouseId)
+    {
+
+        // Enforce API requests cap //
+
+        $this->enforceApiRateLimit();
+
+        $methodPath = str_replace('{id}', $warehouseId, $this->methodsPaths['deleteWarehouse']);
+		$response = Unirest::delete
+		(
+			$this->endpoint.$methodPath,
+			array
+			(
+				"Authorization" => $this->authorization
+			)
+		);
+        
 
         return $this->processReply($response);
 
